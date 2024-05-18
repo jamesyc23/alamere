@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Slider Form Page</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+        }
+        input[type="range"] {
+            width: 100%;
+        }
+        .slider-value {
+            font-weight: bold;
+        }
+        button {
+            padding: 10px 20px;
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+    <script>
+        function updateSliderValue(value) {
+            document.getElementById('accuracy').textContent = "Accuracy: " + value + "%";
+            document.getElementById('cost').textContent = "Cost: $" + value + "/1k requests";
+        }
+
+        function enforceStepValue() {
+            const slider = document.getElementById('confidence_threshold');
+            const value = slider.value;
+            updateSliderValue(slider.value);
+        }
+    </script>
+</head>
+<body>
+    <form>
+        <div class="form-group">
+            <label for="confidence_threshold">Confidence Threshold:</label>
+            <input type="range" id="confidence_threshold" name="confidence_threshold" min="0" max="100" value="50" step="5" oninput="enforceStepValue()">
+            <span class="accuracy" id="accuracy">Accuracy: 50%</span>
+            <p>
+            <span class="cost" id="cost">Cost: $50/1k requests</span>
+        </div>
+        <button type="button">Deploy</button>
+    </form>
+</body>
+</html>
+
