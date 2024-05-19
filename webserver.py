@@ -26,9 +26,13 @@ class App:
         with open("website/deployer.html") as f:
             template = f.read()
 
-            # TODO James: replace this with the right accuracies/costs
-            accuracies = list(range(100))
-            costs = list(range(100))
+            if os.path.exists(f"website/cached_acc_cost_pairs/{dataset}.pq"):
+                curve_points = pd.read_parquet(f"website/cached_acc_cost_pairs/{dataset}.pq")
+                accuracies = curve_points['acc'].tolist()
+                costs = curve_points['cost'].tolist()
+            else:
+                accuracies = list(range(100))
+                costs = list(range(100))
 
             html = template\
                 .replace("PLACEHOLDER_ACCURACIES", json.dumps(accuracies))\
