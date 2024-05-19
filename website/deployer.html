@@ -35,8 +35,10 @@
     </style>
     <script>
         function updateSliderValue(value) {
-            document.getElementById('accuracy').textContent = "Accuracy: " + value + "%";
-            document.getElementById('cost').textContent = "Cost: $" + value + "/1k requests";
+            accuracies = PLACEHOLDER_ACCURACIES;
+            costs = PLACEHOLDER_COSTS;
+            document.getElementById('accuracy').textContent = "Accuracy: " + accuracies[value] + "%";
+            document.getElementById('cost').textContent = "Cost: $" + costs[value] + "/1k requests";
         }
 
         function enforceStepValue() {
@@ -47,15 +49,19 @@
     </script>
 </head>
 <body>
-    <form>
+    <form method="get" action="inference_page">
+        <!-- <form method="get" action="your_target_page.html"> -->
         <div class="form-group">
+            <div class="form-group">
+                <input type="text" id="dataset" name="dataset", value="PLACEHOLDER_DATASET">
+            </div>
             <label for="confidence_threshold">Confidence Threshold:</label>
-            <input type="range" id="confidence_threshold" name="confidence_threshold" min="0" max="100" value="50" step="5" oninput="enforceStepValue()">
+            <input type="range" id="confidence_threshold" name="confidence_threshold" min="0" max="100" value="50" step="1" oninput="enforceStepValue()">
             <span class="accuracy" id="accuracy">Accuracy: 50%</span>
             <p>
             <span class="cost" id="cost">Cost: $50/1k requests</span>
         </div>
-        <button type="button">Deploy</button>
+        <button type="submit">Deploy</button>
     </form>
 </body>
 </html>

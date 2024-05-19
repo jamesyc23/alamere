@@ -48,24 +48,12 @@
     </script>
 </head>
 <body>
-    <form>
+    <form method="get" action="deployer">
         <div class="form-group">
             <label for="dataset">Dataset:</label>
             <input type="text" id="dataset" name="dataset">
         </div>
-        <div class="form-group">
-            <label for="answer_extractor">Answer extractor:</label>
-            <select id="answer_extractor" name="answer_extractor" onchange="toggleRegexTextbox()">
-                <option value="gsm8k">gsm8k</option>
-                <option value="latex">latex</option>
-                <option value="other_regex">other regex</option>
-            </select>
-        </div>
-        <div class="form-group hidden" id="other_regex_textbox">
-            <label for="other_regex">Other regex:</label>
-            <input type="text" id="other_regex" name="other_regex">
-        </div>
-        <button type="button">Callibrate</button>
+        <button type="submit">Callibrate</button>
     </form>
 </body>
 </html>
