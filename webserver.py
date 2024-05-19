@@ -4,6 +4,8 @@ from fastapi import FastAPI
 from fastapi.responses import HTMLResponse, RedirectResponse
 import uvicorn
 import json
+import os
+import pandas as pd
 
 class App:
     def __init__(self):
@@ -28,8 +30,8 @@ class App:
 
             if os.path.exists(f"website/cached_acc_cost_pairs/{dataset}.pq"):
                 curve_points = pd.read_parquet(f"website/cached_acc_cost_pairs/{dataset}.pq")
-                accuracies = curve_points['acc'].tolist()
-                costs = curve_points['cost'].tolist()
+                accuracies = curve_points['acc'].apply(lambda acc: f"{acc:.1%}").tolist()
+                costs = curve_points['cost'].apply(lambda cost: f"{cost:.2f}").tolist()
             else:
                 # TODO Alex: make this work as a loading page
                 accuracies = list(range(100))
