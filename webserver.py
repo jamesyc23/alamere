@@ -31,6 +31,7 @@ class App:
                 accuracies = curve_points['acc'].tolist()
                 costs = curve_points['cost'].tolist()
             else:
+                # TODO Alex: make this work as a loading page
                 accuracies = list(range(100))
                 costs = list(range(100))
 
