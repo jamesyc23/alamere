@@ -1,4 +1,7 @@
+import pandas as pd
 from math import exp
+
+from datasets import load_dataset
 
 def str_to_num_parser(s : str) -> float:
     if isinstance(s, float) or isinstance(s, int):
@@ -29,3 +32,6 @@ def get_tokens_prob(logprobs):
         token_count += 1
     tokens_prob = exp(sum(logprobs['token_logprobs'][-(token_count):-1]))
     return tokens_prob
+
+def get_test_df():
+    return pd.DataFrame(load_dataset("gsm8k", "main")["test"])

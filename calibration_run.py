@@ -3,6 +3,36 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import json
 import glob
+from tqdm import tqdm
+import multiprocess as mp
+
+def get_one_response_wrapper(get_prompt_content, examples_text, model, max_tokens):
+    def local_client():
+        from openai import OpenAI
+        import os
+
+        client = OpenAI(
+            base_url="https://api.runpod.ai/v2/fehv3wh9hksuwk/openai/v1",
+            api_key=os.environ["RUNPOD_API_KEY"],
+        )
+        return client
+        
+
+    def get_one_response(question):
+        client = local_client()
+        response = client.chat.completions.create(
+            messages=[{
+                "role": "user",
+                "content": get_prompt_content(question, examples_text)
+            }],
+            model=model,
+            max_tokens=max_tokens,
+            logprobs=True,
+            top_logprobs=1,
+        )
+        return response
+    
+    return get_one_response
 
 class CalibrationRun:
     def __init__(
@@ -74,6 +104,40 @@ class CalibrationRun:
         print(f"Lines dropped: {lines_dropped}")
         df = pd.DataFrame.from_dict(lines)
         df["q_id"] = df["custom_id"].str.split("_").str[3].astype(int)
+        df["attempt"] = df["response"].apply(
+            lambda r: r['choices'][0]['message']['content']
+        )
+        df['attempt_value'] = df['attempt'].apply(self.dataset.get_value_from_response)
+        df['value_tokens_prob'] = df['response'].apply(lambda r: self.dataset.get_value_tokens_prob(r['choices'][0]['logprobs']))
+        df['all_tokens_logprob'] = df['response'].apply(lambda r: sum(r['choices'][0]['logprobs']['token_logprobs']))
+
+        df = (
+            df[['q_id', 'attempt', 'attempt_value', 'value_tokens_prob', 'all_tokens_logprob']]
+            .merge(self.dataset.df[['q_id', 'question', 'answer']], how='left', on='q_id')
+        )
+        df['correct'] = df.progress_apply(lambda row: 1 if self.dataset.is_equiv(row['attempt'], row['answer']) else 0, axis=1)
+
+        self.results = df
+
+    def get_results_from_serverless(self):
+        get_prompt_content = self.dataset.get_prompt_content
+        examples_text = self.dataset.get_examples_text(self.num_shots)
+        model=self.model_name
+        max_tokens=self.max_response_tokens
+        
+        df = self.dataset.df.sample(self.num_questions, random_state=self.dataset.seed).copy()
+        df = pd.concat([df]*self.num_attempts_per_question, ignore_index=True)
+
+        with mp.Pool(50) as p:
+            results = list(tqdm(p.imap(get_one_response_wrapper(
+                get_prompt_content=get_prompt_content,
+                examples_text=examples_text,
+                model=model,
+                max_tokens=max_tokens,
+            ), df.question)))
+
+        df['response'] = results
+
         df["attempt"] = df["response"].apply(
             lambda r: r['choices'][0]['message']['content']
         )
