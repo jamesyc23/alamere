@@ -42,27 +42,33 @@
         </style>
     </head>
     <body>
-        <div class="container">
-            <div class="box">
-                <div class="form-group">
-                    <label for="question">Question:</label>
-                    <textarea id="question" name="question" rows="5"></textarea>
+        <form method="get" action="inference_page">
+            <div class="container">
+                <div class="box">
+                    <div class="form-group">
+                        <label for="question">Question:</label>
+                        <textarea id="question" name="question" rows="10">
+PLACEHOLDER_QUESTION
+                        </textarea>
+                    </div>
+                    <button type="submit">Submit</button>
                 </div>
-                <button type="submit">Submit</button>
+                <div class="box" PLACEHOLDER_HIDDEN>
+                    <div class="form-group">
+                        <input type="hidden" id="dataset" name="dataset", value="PLACEHOLDER_DATASET">
+                        <input type="hidden" id="confidence_threshold" name="confidence_threshold", value="PLACEHOLDER_CONFIDENCE_THRESHOLD">
+                        <label for="answer">Answer:</label>
+                        <textarea id="answer" name="answer" rows="10" readonly>
+    PLACEHOLDER_ANSWER
+                        </textarea>
+                    </div>
+                    <div>
+                        Model: PLACEHOLDER_MODEL
+                        <p>
+                        Confidence: PLACEHOLDER_CONFIDENCE
+                    </div>
+                </div>
             </div>
-            <div class="box">
-                <div class="form-group">
-                    <input type="hidden" id="dataset" name="dataset", value="PLACEHOLDER_DATASET">
-                    <input type="hidden" id="confidence_threshold" name="confidence_threshold", value="PLACEHOLDER_CONFIDENCE_THRESHOLD">
-                    <label for="answer">Answer:</label>
-                    <textarea id="answer" name="answer" rows="5" readonly></textarea>
-                </div>
-                <div>
-                    <p>Example text line 1.</p>
-                    <p>Example text line 2.</p>
-                    <p>Example text line 3.</p>
-                </div>
-            </div>
-        </div>
+        </form>
     </body>
 </html>

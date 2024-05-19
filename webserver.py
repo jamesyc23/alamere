@@ -6,6 +6,7 @@ import uvicorn
 import json
 import os
 import pandas as pd
+from live_infer import infer_with_fallback
 
 class App:
     def __init__(self):
@@ -46,11 +47,25 @@ class App:
     async def inference_page(self, dataset : str, confidence_threshold : int, question : Optional[str] = None) -> HTMLResponse:
         assert dataset
         assert 0 <= confidence_threshold <= 100
+        if question is None or not question.strip():
+            question = ""
+
+        explanation, confidence, model = infer_with_fallback(question, round(confidence_threshold / 100))
+
+        hidden = 'hidden="true"'
+        if question:
+            hidden = ""
+
         with open("website/inference_page.html", "r") as f:
             template = f.read()
             html = template\
                 .replace("PLACEHOLDER_DATASET", dataset)\
-                .replace("PLACEHOLDER_CONFIDENCE_THRESHOLD", str(confidence_threshold))
+                .replace("PLACEHOLDER_QUESTION", question)\
+                .replace("PLACEHOLDER_CONFIDENCE_THRESHOLD", str(confidence_threshold))\
+                .replace("PLACEHOLDER_ANSWER", explanation)\
+                .replace("PLACEHOLDER_CONFIDENCE", str(confidence))\
+                .replace("PLACEHOLDER_HIDDEN", hidden)\
+                .replace("PLACEHOLDER_MODEL", model)
             return HTMLResponse(html)
 
 
