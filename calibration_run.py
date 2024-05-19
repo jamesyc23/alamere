@@ -156,6 +156,7 @@ class CalibrationRun:
     def get_confs(self, confidence_estimator):
         assert self.results is not None, "results not yet parsed"
         if confidence_estimator == "sampled_conf":
+            # TODO James: change this function to have rows per (question, attempt_value) pair
             confs = (
                 self.results[['q_id', 'attempt_value', 'correct']]
                 .assign(sampled_conf=1/self.num_attempts_per_question)
