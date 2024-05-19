@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Question and Answer Form</title>
+        <style>
+         body {
+             font-family: Arial, sans-serif;
+             margin: 20px;
+         }
+         .container {
+             display: flex;
+             justify-content: space-between;
+         }
+         .box {
+             width: 45%;
+         }
+         .form-group {
+             margin-bottom: 15px;
+         }
+         label {
+             display: block;
+             margin-bottom: 5px;
+         }
+         input[type="text"], textarea {
+             width: 100%;
+             padding: 8px;
+             box-sizing: border-box;
+         }
+         button {
+             padding: 10px 20px;
+             background-color: #007BFF;
+             color: white;
+             border: none;
+             cursor: pointer;
+             margin-top: 10px;
+         }
+         button:hover {
+             background-color: #0056b3;
+         }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <div class="box">
+                <div class="form-group">
+                    <label for="question">Question:</label>
+                    <textarea id="question" name="question" rows="5"></textarea>
+                </div>
+                <button type="submit">Submit</button>
+            </div>
+            <div class="box">
+                <div class="form-group">
+                    <input type="text" id="dataset" name="dataset", value="PLACEHOLDER_DATASET">
+                    <input type="text" id="confidence_threshold" name="confidence_threshold", value="PLACEHOLDER_CONFIDENCE_THRESHOLD">
+                    <label for="answer">Answer:</label>
+                    <textarea id="answer" name="answer" rows="5"></textarea>
+                </div>
+                <div>
+                    <p>Example text line 1.</p>
+                    <p>Example text line 2.</p>
+                    <p>Example text line 3.</p>
+                </div>
+            </div>
+        </div>
+    </body>
+</html>
