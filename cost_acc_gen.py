@@ -19,7 +19,10 @@ def cost_acc_curve_points(confidence_estimator, run_small, run_big, cost_small, 
             .reset_index()
         )
         pct_meeting_conf_threshold = len(attempts_above_conf_threshold) / len(run_small_confs)
-        cost = cost_small + cost_big * (1 - pct_meeting_conf_threshold)
+        if confidence_estimator == "sampled_conf":
+            cost = cost_small * 5 + cost_big * (1 - pct_meeting_conf_threshold)
+        elif confidence_estimator == "all_tokens_logprob_conf":
+            cost = cost_small + cost_big * (1 - pct_meeting_conf_threshold)
         acc = (
             attempts_above_conf_threshold['correct'].mean() * pct_meeting_conf_threshold
             + attempts_below_conf_threshold['correct'].mean() * (1 - pct_meeting_conf_threshold)

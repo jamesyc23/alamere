@@ -156,17 +156,16 @@ class CalibrationRun:
     def get_confs(self, confidence_estimator):
         assert self.results is not None, "results not yet parsed"
         if confidence_estimator == "sampled_conf":
-            # TODO James: change this function to have rows per (question, attempt_value) pair
-            confs = (
-                self.results[['q_id', 'attempt_value', 'correct']]
-                .assign(sampled_conf=1/self.num_attempts_per_question)
+            test = self.results[['q_id', 'attempt_value', 'correct']].groupby("q_id").head(5)
+            confs = test.merge(
+                test[['q_id', 'attempt_value']]
+                .assign(sampled_conf=1/5)
                 .groupby(['q_id', 'attempt_value'])
-                .aggregate({'sampled_conf': 'sum', 'correct': 'mean'})
-                .reset_index()
+                .sum()
+                .reset_index(),
+                on=['q_id', 'attempt_value'],
+                how='left',
             )
-
-            idx = confs.groupby('q_id')['sampled_conf'].transform("max") == confs['sampled_conf']
-            confs = confs[idx].groupby('q_id').first()
 
         elif confidence_estimator ==  "value_tokens_prob":
             confs = self.results[['q_id', 'value_tokens_prob', 'correct']]
@@ -198,7 +197,7 @@ class CalibrationRun:
         plt.xlim(0, 1)
         plt.ylim(0, 1)
         plt.scatter(binned[confidence_estimator], binned['correct'])
-        # ax.plot([0,1],[0,1], transform=ax.transAxes)
+        ax.plot([0,1],[0,1], transform=ax.transAxes)
 
         plt.title(f"{self.model_name} calibration\n({self.dataset.dataset_name} {self.num_shots}-shot, {self.num_questions} Qs, {self.num_attempts_per_question} attempts/Q)")
         plt.xlabel(confidence_estimator)
