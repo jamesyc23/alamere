@@ -16,7 +16,8 @@ score between 0 and 1 for the model's response. Then we check to see if the conf
 * If yes, we return the answer to the user;
 * If no, we pass the request to the large model and return the large model's response to the user instead.
 
-Somewhat surprisingly, we found that a linear transformation of the log probability of the model's full response was a good predictor of a model's accuracy, achieving ... r<sup>2</sup>.
+Somewhat surprisingly, we found that a linear transformation of the log probability of the model's full response was a good predictor of a model's accuracy, achieving 90.6% r<sup>2</sup>
+relative to a mean accuracy predictor with bin size 100.
 
 The final implementation is as follows:
 1. User inputs a collection of representative problems (we use these to fit the linear model coefficients and also to compute what the expected accuracy and cost are for a given threshold).
@@ -26,14 +27,7 @@ The final implementation is as follows:
 
 See the above results / play around with the data for yourself in confidence.ipynb!
 
-## Appendix (TBC)
-__Previous Work:__ 
+## Appendix
 
-__Confidence computation details:__
-
-__Another approach to computing confidence (sampling):__
-
+[__Hackathon Demo Video__](https://www.loom.com/share/0670862f1d2e4a14af76b129e53f0537)
 [__Hackathon Presentation Slides__](https://docs.google.com/presentation/d/17zzomxlxOBamHTs4gzot2qo9yquAVc8Y2N0vuzEe-AE/edit?usp=sharing)
-
-
-
