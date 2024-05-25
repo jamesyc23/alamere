@@ -33,7 +33,7 @@ The final implementation is as follows:
   <img src="images/implementation_flow_chart.png" width=50% height=50%>
 </p>
 
-See the above results / play around with the data for yourself in confidence.ipynb!
+See the above results / play around with the data for yourself in the confidence_research.ipynb notebook!
 
 ## Appendix
 
