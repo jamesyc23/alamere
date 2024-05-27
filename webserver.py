@@ -50,7 +50,7 @@ class App:
         if question is None or not question.strip():
             question = ""
 
-        explanation, confidence, model = infer_with_fallback(question, round(confidence_threshold / 100))
+        explanation, confidence, model = infer_with_fallback(question, confidence_threshold / 100)
 
         hidden = 'hidden="true"'
         if question:

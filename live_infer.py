@@ -48,15 +48,16 @@ def infer_with_fallback(question, threshold):
 
     client = llama3_70b_client()
 
+    print(f"{confidence=} {threshold=}")
     if confidence < threshold:
         response = client.chat.completions.create(model="meta-llama/Meta-Llama-3-70B-Instruct", **construct_request(question))
-        cumulative_logprobs = sum(response.choices[0].logprobs.token_logprobs)
-        confidence = np.dot(np.array([cumulative_logprobs, 1]), np.array([0.01186387, 1.05021634]))
+        # cumulative_logprobs = sum(response.choices[0].logprobs.token_logprobs)
+        # confidence = np.dot(np.array([cumulative_logprobs, 1]), np.array([0.01186387, 1.05021634]))
         return response.choices[0].message.content, confidence, "Llama3-70B-Instruct"
     else:
         return explanation, confidence, "Llama3-8B-Instruct"
 
 if __name__ == "__main__":
-    threshold = 0.9
+    threshold = 0.8
     question = "Jack and Jill each brought a bottle of water up a hill. How many bottles of water did they bring up the hill combined?"
     print(infer_with_fallback(question, threshold))
