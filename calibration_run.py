@@ -110,9 +110,10 @@ class CalibrationRun:
         df['attempt_value'] = df['attempt'].apply(self.dataset.get_value_from_response)
         df['value_tokens_prob'] = df['response'].apply(lambda r: self.dataset.get_value_tokens_prob(r['choices'][0]['logprobs']))
         df['all_tokens_logprob'] = df['response'].apply(lambda r: sum(r['choices'][0]['logprobs']['token_logprobs']))
+        df['completion_tokens'] = df['response'].apply(lambda r: r['usage']['completion_tokens'])
 
         df = (
-            df[['q_id', 'attempt', 'attempt_value', 'value_tokens_prob', 'all_tokens_logprob']]
+            df[['q_id', 'attempt', 'attempt_value', 'value_tokens_prob', 'all_tokens_logprob', 'completion_tokens']]
             .merge(self.dataset.df[['q_id', 'question', 'answer']], how='left', on='q_id')
         )
         df['correct'] = df.progress_apply(lambda row: 1 if self.dataset.is_equiv(row['attempt'], row['answer']) else 0, axis=1)
@@ -144,9 +145,10 @@ class CalibrationRun:
         df['attempt_value'] = df['attempt'].apply(self.dataset.get_value_from_response)
         df['value_tokens_prob'] = df['response'].apply(lambda r: self.dataset.get_value_tokens_prob(r['choices'][0]['logprobs']))
         df['all_tokens_logprob'] = df['response'].apply(lambda r: sum(r['choices'][0]['logprobs']['token_logprobs']))
+        df['completion_tokens'] = df['response'].apply(lambda r: r['usage']['completion_tokens'])
 
         df = (
-            df[['q_id', 'attempt', 'attempt_value', 'value_tokens_prob', 'all_tokens_logprob']]
+            df[['q_id', 'attempt', 'attempt_value', 'value_tokens_prob', 'all_tokens_logprob', 'completion_tokens']]
             .merge(self.dataset.df[['q_id', 'question', 'answer']], how='left', on='q_id')
         )
         df['correct'] = df.progress_apply(lambda row: 1 if self.dataset.is_equiv(row['attempt'], row['answer']) else 0, axis=1)
@@ -175,6 +177,9 @@ class CalibrationRun:
             y = self.results['correct'].to_numpy()
             betas = np.linalg.inv(X.T @ X) @ X.T @ y
             confs = self.results[['q_id', 'correct']].assign(all_tokens_logprob_conf = (X @ betas))
+
+        else:
+            confs = self.results[['q_id', confidence_estimator, 'correct']]
 
         return confs
     
