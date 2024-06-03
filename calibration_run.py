@@ -107,19 +107,21 @@ class CalibrationRun:
         print(f"Lines dropped: {lines_dropped}")
         df = pd.DataFrame.from_dict(lines)
         df["q_id"] = df["custom_id"].str.split("_").str[3].astype(int)
-        df["attempt"] = df["response"].apply(
-            lambda r: r['choices'][0]['message']['content']
+        df["choices"] = df["response"]["choices"]
+        df['completion_tokens'] = df['response'].apply(lambda r: r['usage']['completion_tokens'])
+        df = df.explode("choices")
+        df["attempt"] = df["choices"].apply(
+            lambda c: c['message']['content']
         )
         df['attempt_value'] = df['attempt'].apply(self.dataset.get_value_from_response)
-        df['value_tokens_prob'] = df['response'].apply(lambda r: self.dataset.get_value_tokens_prob(r['choices'][0]['logprobs']))
-        df['all_tokens_logprob'] = df['response'].apply(lambda r: sum(r['choices'][0]['logprobs']['token_logprobs']))
-        df['completion_tokens'] = df['response'].apply(lambda r: r['usage']['completion_tokens'])
+        df['value_tokens_prob'] = df['choices'].apply(lambda c: self.dataset.get_value_tokens_prob(c['logprobs']))
+        df['all_tokens_logprob'] = df['choices'].apply(lambda c: sum(c['logprobs']['token_logprobs']))        
 
         df = (
             df[['q_id', 'attempt', 'attempt_value', 'value_tokens_prob', 'all_tokens_logprob', 'completion_tokens']]
             .merge(self.dataset.df[['q_id', 'question', 'answer']], how='left', on='q_id')
         )
-        df['correct'] = df.progress_apply(lambda row: 1 if self.dataset.is_equiv(row['attempt'], row['answer']) else 0, axis=1)
+        df['correct'] = df.apply(lambda row: 1 if self.dataset.is_equiv(row['attempt'], row['answer']) else 0, axis=1)
 
         self.results = df
 
