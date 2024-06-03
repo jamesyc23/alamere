@@ -97,7 +97,7 @@ class CalibrationRun:
         
         lines = []
 
-        for file in glob.glob(self.results_file_pattern):
+        for file in tqdm(glob.glob(self.results_file_pattern)):
             with open(file, "r") as f:
                 lines.extend([parse_json_string(line.rstrip()) for line in f])
         
@@ -107,18 +107,24 @@ class CalibrationRun:
         print(f"Lines dropped: {lines_dropped}")
         df = pd.DataFrame.from_dict(lines)
         df["q_id"] = df["custom_id"].str.split("_").str[3].astype(int)
-        df["choices"] = df["response"]["choices"]
+        df["choices"] = df["response"].apply(lambda r: r["choices"])
         df['completion_tokens'] = df['response'].apply(lambda r: r['usage']['completion_tokens'])
         df = df.explode("choices")
         df["attempt"] = df["choices"].apply(
             lambda c: c['message']['content']
         )
         df['attempt_value'] = df['attempt'].apply(self.dataset.get_value_from_response)
-        df['value_tokens_prob'] = df['choices'].apply(lambda c: self.dataset.get_value_tokens_prob(c['logprobs']))
-        df['all_tokens_logprob'] = df['choices'].apply(lambda c: sum(c['logprobs']['token_logprobs']))        
+        # df['value_tokens_prob'] = df['choices'].apply(lambda c: self.dataset.get_value_tokens_prob(c['logprobs']))
+
+        # if else here to handle chat completion format changing
+        df['all_tokens_logprob'] = (
+            df['choices'].apply(lambda c: sum(c['logprobs']['token_logprobs']))
+            if 'token_logprobs' in df['choices'].iloc[0]['logprobs']
+            else df['choices'].apply(lambda c: sum([t['logprob'] for t in c['logprobs']['content']]))
+        )
 
         df = (
-            df[['q_id', 'attempt', 'attempt_value', 'value_tokens_prob', 'all_tokens_logprob', 'completion_tokens']]
+            df[['q_id', 'attempt', 'attempt_value', 'all_tokens_logprob', 'completion_tokens']]
             .merge(self.dataset.df[['q_id', 'question', 'answer']], how='left', on='q_id')
         )
         df['correct'] = df.apply(lambda row: 1 if self.dataset.is_equiv(row['attempt'], row['answer']) else 0, axis=1)
@@ -163,10 +169,9 @@ class CalibrationRun:
     def get_confs(self, confidence_estimator):
         assert self.results is not None, "results not yet parsed"
         if confidence_estimator == "sampled_conf":
-            test = self.results[['q_id', 'attempt_value', 'correct']].groupby("q_id").head(5)
-            confs = test.merge(
-                test[['q_id', 'attempt_value']]
-                .assign(sampled_conf=1/5)
+            confs = self.results.merge(
+                self.results[['q_id', 'attempt_value']]
+                .assign(sampled_conf=1/self.num_attempts_per_question)
                 .groupby(['q_id', 'attempt_value'])
                 .sum()
                 .reset_index(),
