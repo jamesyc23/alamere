@@ -45,6 +45,7 @@ class CalibrationRun:
         max_response_tokens,
         requests_file_path,
         results_file_pattern,
+        num_choices=1,
     ):
         self.dataset = dataset
         self.model_name = model_name
@@ -55,6 +56,7 @@ class CalibrationRun:
         self.requests_file_path = requests_file_path
         self.results_file_pattern = results_file_pattern
         self.results = None
+        self.num_choices = num_choices
 
     def write_requests_file(self):
         df = self.dataset.df.sample(self.num_questions, random_state=self.dataset.seed).copy()
@@ -81,6 +83,7 @@ class CalibrationRun:
                         "max_tokens": self.max_response_tokens,
                         "logprobs": True,
                         "top_logprobs": 1,
+                        "n": self.num_choices,
                     }
                 }
                 print(json.dumps(dict_for_one_request), file=f)
