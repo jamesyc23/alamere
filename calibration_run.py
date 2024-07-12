@@ -107,7 +107,7 @@ class CalibrationRun:
         print(f"Lines dropped: {lines_dropped}")
         df = pd.DataFrame.from_dict(lines)
         df["q_id"] = df["custom_id"].str.split("_").str[3].astype(int)
-        df["choices"] = df["response"]["choices"]
+        df["choices"] = df["response"].apply(lambda r: r["choices"])
         df['completion_tokens'] = df['response'].apply(lambda r: r['usage']['completion_tokens'])
         df = df.explode("choices")
         df["attempt"] = df["choices"].apply(
@@ -174,8 +174,11 @@ class CalibrationRun:
                 how='left',
             )
 
-        elif confidence_estimator ==  "value_tokens_prob":
-            confs = self.results[['q_id', 'value_tokens_prob', 'correct']]
+        elif confidence_estimator ==  "value_tokens_prob_conf":
+            X = self.results[['value_tokens_prob']].assign(ones=1).to_numpy()
+            y = self.results['correct'].to_numpy()
+            betas = np.linalg.inv(X.T @ X) @ X.T @ y
+            confs = self.results[['q_id', 'correct']].assign(value_tokens_prob_conf = (X @ betas))
 
         elif confidence_estimator ==  "all_tokens_logprob_conf":
             X = self.results[['all_tokens_logprob']].assign(ones=1).to_numpy()
